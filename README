@@ -1,1 +1,4 @@
-Requiere tener instalado y configurado en PATH wireshark (tshark.exe)
+Requiere tener instalado y configurado en PATH wireshark (tshark.exe).
+
+# Para bloquear una IP desde powershell:
+# New-NetFirewallRule -DisplayName "Bloquear IP 194.5.215.226" -Direction Inbound -Action Block -RemoteAddress 194.5.215.226

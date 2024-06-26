@@ -12,6 +12,8 @@ import whois
 
 # Configuración de bitácora y consola
 LOG_FILE = "..\\network_activity.log"
+EXCLUDE_FILE=".\\exclude.txt"
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', handlers=[
     logging.FileHandler(LOG_FILE),
     logging.StreamHandler()
@@ -24,6 +26,15 @@ if not os.path.exists(CAPTURE_DIR):
 
 # Evento de threading para detener los hilos
 stop_event = threading.Event()
+
+# Exclusion de IP
+def load_exclude_ips(file_path):
+    if not os.path.exists(file_path):
+        return set()
+    with open(file_path, 'r') as file:
+        return set(line.strip() for line in file if line.strip())
+    
+exclude_ips = load_exclude_ips(EXCLUDE_FILE)
 
 # Función para enviar notificaciones usando PowerShell
 def send_windows_notification(title, message):
@@ -65,6 +76,10 @@ def analyze_packet(packet):
         flags = packet[TCP].flags
         src_ip = packet[IP].src
         dst_ip = packet[IP].dst
+
+        if src_ip in exclude_ips or dst_ip in exclude_ips:
+            return
+
         dst_port = packet[TCP].dport
         src_host = get_host_name(src_ip)
         dst_host = get_host_name(dst_ip)
